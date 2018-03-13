@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Globalization;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing;
@@ -11,12 +12,13 @@ namespace d
     class NoiseGen
     {
         public double noiseval;
-        public double[,] noisegrid = new double[256, 256];
+        public double[,] noisegrid = new double[64, 64];
         public int oct = 0, freq = 1;
         public Random random = new Random();
         public Bitmap out1, out2, out3;
         public double[,] Noisegridgen()
         {
+            oct = 0;freq = 1;
             while (freq <= noisegrid.GetLength(0)&&freq <= noisegrid.GetLength(1))
             {
                 for (int i = 0; i < noisegrid.GetLength(0)/freq; i++)
@@ -102,13 +104,13 @@ namespace d
             {
                 for (int y=0;y<fractal.GetLength(1);y++)
                 {
-                    fractal[x, y] = (a[x, y] + b[x, y]) / 2;
+                    fractal[x, y] = (a[x, y] + b[x, y]) / 10;
                 }
             }
             PictureBox pictureBox = new PictureBox
             {
-                Height = 4096,
-                Width = 4096
+                Height = 1028,
+                Width = 1028
             };
             Bitmap bitmap = new Bitmap(pictureBox.Width, pictureBox.Height, pictureBox.CreateGraphics());
             int boxsizex = bitmap.Width / a.GetLength(0), boxsizey = bitmap.Height / a.GetLength(1);
@@ -135,8 +137,8 @@ namespace d
         {
             PictureBox pictureBox = new PictureBox
             {
-                Height = 4096,
-                Width = 4096
+                Height = 1028,
+                Width = 1028
             };
             Bitmap bitmap = new Bitmap(pictureBox.Width, pictureBox.Height, pictureBox.CreateGraphics());
             int boxsizex = bitmap.Width / a.GetLength(0), boxsizey = bitmap.Height / a.GetLength(1);
@@ -163,8 +165,8 @@ namespace d
         {
             PictureBox pictureBox = new PictureBox
             {
-                Height = 4096,
-                Width = 4096
+                Height = 1028,
+                Width = 1028
             };
             Bitmap bitmap = new Bitmap(a.Width, a.Height, pictureBox.CreateGraphics());
             double n1, n2, n3, n4,n5,n6,n7,n8;
@@ -195,8 +197,8 @@ namespace d
         {
             PictureBox pictureBox = new PictureBox
             {
-                Height = 4096,
-                Width = 4096
+                Height = 1028,
+                Width = 1028
             };
             Bitmap bitmap = new Bitmap(a.Width, a.Height, pictureBox.CreateGraphics());
             int diff;
@@ -234,8 +236,8 @@ namespace d
         {
             PictureBox pictureBox = new PictureBox
             {
-                Height = 4096,
-                Width = 4096
+                Height = 1028,
+                Width = 1028
             };
             Bitmap bitmap = new Bitmap(a.Width, a.Height, pictureBox.CreateGraphics());
             int color;
@@ -284,8 +286,8 @@ namespace d
             p.Noisegridgen();
             PictureBox pictureBox = new PictureBox
             {
-                Height = 4096,
-                Width = 4096
+                Height = 1028,
+                Width = 1028
             }; Bitmap a = new Bitmap(pictureBox.Width, pictureBox.Height, pictureBox.CreateGraphics());
             Bitmap b = new Bitmap(pictureBox.Width, pictureBox.Height, pictureBox.CreateGraphics());
             double[,] i = new double[p.noisegrid.GetLength(0), p.noisegrid.GetLength(1)], j = new double[p.noisegrid.GetLength(0), p.noisegrid.GetLength(1)];
@@ -304,6 +306,36 @@ namespace d
     }
     class DataSaveLoad
     {
-
+        public StreamWriter sw = new StreamWriter(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)+"\\d.txt");
+        public void MapData(double[,] map, Bitmap bitmap)
+        {
+            StringBuilder sb = new StringBuilder();
+            byte c=1; int width, height, color, boxX,boxY;
+            while (Math.Pow(2,c)<=map.GetLength(0))
+            {
+                c++;
+            }
+            string hex = c.ToString("X");c = byte.Parse(hex, NumberStyles.HexNumber);sb.Append(c);
+            byte d = 1;
+            while (Math.Pow(2, d) <= map.GetLength(1))
+            {
+                d++;
+            }
+            hex = d.ToString("X"); d = byte.Parse(hex, NumberStyles.HexNumber);sb.Append(d);
+            hex = bitmap.Width.ToString("X"); width = int.Parse(hex, NumberStyles.HexNumber); sb.Append(width);
+            hex = bitmap.Height.ToString("X"); height = int.Parse(hex, NumberStyles.HexNumber); sb.Append(height);
+            boxX = bitmap.Width / map.GetLength(0);boxY = bitmap.Height / map.GetLength(1);
+            sw.WriteLine(sb);sb.Clear();
+            for (int x=0;x<bitmap.Width;x+=boxX)
+            {
+                for (int y=0;y<bitmap.Height;y+=boxY)
+                {
+                    color = bitmap.GetPixel(x, y).ToArgb(); hex = color.ToString("X"); color = int.Parse(hex, NumberStyles.HexNumber);
+                    sb.Append(color);
+                }
+                sw.WriteLine(sb); sb.Clear();
+            }
+            sw.Dispose();
+        }
     }
 }
